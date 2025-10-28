@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: core
+
+  # JSP Configuration
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+  # Tomcat JNDI DataSource Configuration (for production deployment)
+  # Uncomment below when deploying to Tomcat with JNDI
+  # datasource:
+  #   jndi-name: java:comp/env/jdbc/myDataSource
+
+# MyBatis Configuration
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.core.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+---
+# Profile for production with JNDI
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    jndi-name: java:comp/env/jdbc/myDataSource
