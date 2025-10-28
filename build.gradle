@@ -37,3 +37,18 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// 오프라인 환경 준비를 위한 task
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    from configurations.compileClasspath
+    into 'libs'
+}
+
+task prepareOffline {
+    dependsOn copyDependencies
+    doLast {
+        println "✅ 모든 의존성이 libs 폴더에 복사되었습니다."
+        println "📦 오프라인 환경에서는 build.gradle의 repositories를 수정하세요."
+    }
+}
