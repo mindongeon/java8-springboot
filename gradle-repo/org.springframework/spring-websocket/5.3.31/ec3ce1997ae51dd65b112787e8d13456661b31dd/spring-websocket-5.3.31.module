@@ -1,0 +1,262 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.springframework",
+    "module": "spring-websocket",
+    "version": "5.3.31",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.5.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.springframework",
+          "module": "spring-context",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        },
+        {
+          "group": "org.springframework",
+          "module": "spring-core",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        },
+        {
+          "group": "org.springframework",
+          "module": "spring-web",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "spring-websocket-5.3.31.jar",
+          "url": "spring-websocket-5.3.31.jar",
+          "size": 447579,
+          "sha512": "85f29824947663822374c9469ecf005ccf482a7d4a61223f9a59d3c4dff119e049fdf89dedaac499abb03f5f6f3afb5670cc95422a0b25545d08c149c8e3b5cf",
+          "sha256": "ca8ff8d0f886fa32de3104c4941886910ff41e818b41a43a546514e920a25e3f",
+          "sha1": "7aa3ae3fa2dd8a07e61b88a186d8e27f1a6c86d8",
+          "md5": "099e8d4d0f1fcd93e7a846880ba73284"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.springframework",
+          "module": "spring-context",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        },
+        {
+          "group": "org.springframework",
+          "module": "spring-core",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        },
+        {
+          "group": "org.springframework",
+          "module": "spring-web",
+          "version": {
+            "requires": "5.3.31"
+          },
+          "excludes": [
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-servlet-api"
+            },
+            {
+              "group": "org.apache.taglibs",
+              "module": "taglibs-standard-spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.websocket",
+              "module": "jboss-websocket-api_1.1_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.servlet",
+              "module": "jboss-servlet-api_4.0_spec"
+            },
+            {
+              "group": "org.jboss.spec.javax.annotation",
+              "module": "jboss-annotations-api_1.3_spec"
+            },
+            {
+              "group": "org.apache.tomcat",
+              "module": "tomcat-websocket-api"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "spring-websocket-5.3.31.jar",
+          "url": "spring-websocket-5.3.31.jar",
+          "size": 447579,
+          "sha512": "85f29824947663822374c9469ecf005ccf482a7d4a61223f9a59d3c4dff119e049fdf89dedaac499abb03f5f6f3afb5670cc95422a0b25545d08c149c8e3b5cf",
+          "sha256": "ca8ff8d0f886fa32de3104c4941886910ff41e818b41a43a546514e920a25e3f",
+          "sha1": "7aa3ae3fa2dd8a07e61b88a186d8e27f1a6c86d8",
+          "md5": "099e8d4d0f1fcd93e7a846880ba73284"
+        }
+      ]
+    }
+  ]
+}

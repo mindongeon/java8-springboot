@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: core-test
+
+  # JSP Configuration
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+# MyBatis Configuration (테스트에서는 비활성화)
+# mybatis:
+#   mapper-locations: classpath:mapper/**/*.xml
+#   type-aliases-package: com.core.model
+
+# Logging
+logging:
+  level:
+    com.core: INFO

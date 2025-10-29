@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <!-- JNDI DataSource 설정 -->
+    <!--
+        실제 운영 환경에서는 Tomcat의 server.xml 또는 context.xml에 설정합니다.
+        여기는 개발 환경용 예시입니다.
+    -->
+    <Resource name="jdbc/myDataSource"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/mydb?useSSL=false&amp;serverTimezone=UTC"
+              username="dbuser"
+              password="dbpassword"
+              maxTotal="20"
+              maxIdle="10"
+              minIdle="5"
+              maxWaitMillis="10000"
+              validationQuery="SELECT 1"
+              testOnBorrow="true"
+              testWhileIdle="true"
+              timeBetweenEvictionRunsMillis="30000"
+              minEvictableIdleTimeMillis="60000"/>
+
+    <!-- Oracle 예시 (주석 처리됨) -->
+    <!--
+    <Resource name="jdbc/myDataSource"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="oracle.jdbc.OracleDriver"
+              url="jdbc:oracle:thin:@localhost:1521:xe"
+              username="dbuser"
+              password="dbpassword"
+              maxTotal="20"
+              maxIdle="10"
+              minIdle="5"
+              maxWaitMillis="10000"
+              validationQuery="SELECT 1 FROM DUAL"
+              testOnBorrow="true"/>
+    -->
+
+    <!-- PostgreSQL 예시 (주석 처리됨) -->
+    <!--
+    <Resource name="jdbc/myDataSource"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="org.postgresql.Driver"
+              url="jdbc:postgresql://localhost:5432/mydb"
+              username="dbuser"
+              password="dbpassword"
+              maxTotal="20"
+              maxIdle="10"
+              minIdle="5"
+              maxWaitMillis="10000"
+              validationQuery="SELECT 1"
+              testOnBorrow="true"/>
+    -->
+
+    <!-- H2 Database 예시 (개발용) -->
+    <!--
+    <Resource name="jdbc/myDataSource"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="org.h2.Driver"
+              url="jdbc:h2:mem:testdb"
+              username="sa"
+              password=""
+              maxTotal="20"
+              maxIdle="10"
+              minIdle="5"/>
+    -->
+</Context>

@@ -8,8 +8,7 @@ spring:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
 
-  # Tomcat JNDI DataSource Configuration (for production deployment)
-  # Uncomment below when deploying to Tomcat with JNDI
+  # Tomcat JNDI DataSource Configuration (주석 처리 - 필요시 활성화)
   # datasource:
   #   jndi-name: java:comp/env/jdbc/myDataSource
 
@@ -19,12 +18,29 @@ mybatis:
   type-aliases-package: com.core.model
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# Logging
+logging:
+  level:
+    com.core.mapper: DEBUG
+    org.springframework.jdbc: DEBUG
 
 ---
-# Profile for production with JNDI
+# Profile for development (without JNDI)
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: dev
+
+  # 개발 환경용 직접 DataSource 설정 예시
   datasource:
-    jndi-name: java:comp/env/jdbc/myDataSource
+    url: jdbc:mysql://localhost:3306/mydb
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: dbuser
+    password: dbpassword
+
+logging:
+  level:
+    com.core.mapper: DEBUG
+    org.springframework.jdbc: DEBUG
