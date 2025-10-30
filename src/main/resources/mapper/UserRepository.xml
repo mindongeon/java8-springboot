@@ -2,48 +2,64 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.core.mapper.UserMapper">
+<mapper namespace="com.core.domain.user.repository.UserRepository">
 
     <!-- Result Map -->
-    <resultMap id="userResultMap" type="com.core.model.User">
+    <resultMap id="userEntityResultMap" type="com.core.domain.user.entity.UserEntity">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
         <result property="email" column="email"/>
+        <result property="isActive" column="is_active"/>
+        <result property="status" column="status"/>
+        <result property="orderCount" column="order_count"/>
         <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <!-- 모든 사용자 조회 -->
-    <select id="findAll" resultMap="userResultMap">
-        SELECT id, username, email, created_at
+    <select id="findAll" resultMap="userEntityResultMap">
+        SELECT id, username, email, is_active, status, order_count, created_at, updated_at, deleted_at
         FROM users
+        WHERE deleted_at IS NULL
         ORDER BY id DESC
     </select>
 
     <!-- ID로 사용자 조회 -->
-    <select id="findById" parameterType="long" resultMap="userResultMap">
-        SELECT id, username, email, created_at
+    <select id="findById" parameterType="long" resultMap="userEntityResultMap">
+        SELECT id, username, email, is_active, status, order_count, created_at, updated_at, deleted_at
         FROM users
         WHERE id = #{id}
     </select>
 
     <!-- 사용자명으로 사용자 조회 -->
-    <select id="findByUsername" parameterType="string" resultMap="userResultMap">
-        SELECT id, username, email, created_at
+    <select id="findByUsername" parameterType="string" resultMap="userEntityResultMap">
+        SELECT id, username, email, is_active, status, order_count, created_at, updated_at, deleted_at
         FROM users
         WHERE username = #{username}
     </select>
 
+    <!-- 이메일로 사용자 조회 -->
+    <select id="findByEmail" parameterType="string" resultMap="userEntityResultMap">
+        SELECT id, username, email, is_active, status, order_count, created_at, updated_at, deleted_at
+        FROM users
+        WHERE email = #{email}
+    </select>
+
     <!-- 사용자 등록 -->
-    <insert id="insert" parameterType="com.core.model.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users (username, email, created_at)
-        VALUES (#{username}, #{email}, NOW())
+    <insert id="insert" parameterType="com.core.domain.user.entity.UserEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, email, is_active, status, created_at)
+        VALUES (#{username}, #{email}, #{isActive}, #{status}, NOW())
     </insert>
 
     <!-- 사용자 정보 수정 -->
-    <update id="update" parameterType="com.core.model.User">
+    <update id="update" parameterType="com.core.domain.user.entity.UserEntity">
         UPDATE users
         SET username = #{username},
-            email = #{email}
+            email = #{email},
+            is_active = #{isActive},
+            status = #{status},
+            updated_at = NOW()
         WHERE id = #{id}
     </update>
 
@@ -57,13 +73,30 @@
     <select id="count" resultType="int">
         SELECT COUNT(*)
         FROM users
+        WHERE deleted_at IS NULL
+    </select>
+
+    <!-- 사용자명 중복 체크 -->
+    <select id="existsByUsername" parameterType="string" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM users
+        WHERE username = #{username}
+        AND deleted_at IS NULL
+    </select>
+
+    <!-- 이메일 중복 체크 -->
+    <select id="existsByEmail" parameterType="string" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM users
+        WHERE email = #{email}
+        AND deleted_at IS NULL
     </select>
 
     <!-- ==================== 극한 동적 쿼리 예시 시작 ==================== -->
 
     <!-- SQL 재사용을 위한 fragment 정의 -->
     <sql id="baseColumns">
-        u.id, u.username, u.email, u.created_at
+        u.id, u.username, u.email, u.is_active, u.status, u.order_count, u.created_at, u.updated_at, u.deleted_at
     </sql>
 
     <sql id="dynamicWhereConditions">
@@ -242,21 +275,9 @@
     </sql>
 
     <!-- 극한 동적 쿼리 - 복잡한 검색 -->
-    <select id="searchUsersWithDynamicQuery" parameterType="com.core.model.UserSearchCriteria" resultMap="userResultMap">
+    <select id="searchUsersWithDynamicQuery" parameterType="com.core.model.UserSearchCriteria" resultMap="userEntityResultMap">
         SELECT
             <include refid="baseColumns"/>
-            <!-- 동적으로 추가 컬럼 계산 -->
-            <if test="priorityLevel != null and priorityLevel != ''">
-                , CASE
-                    WHEN u.order_count &gt;= 100 THEN 'VIP'
-                    WHEN u.order_count &gt;= 50 THEN 'PREMIUM'
-                    WHEN u.order_count &gt;= 10 THEN 'REGULAR'
-                    ELSE 'NORMAL'
-                END AS priority_level
-            </if>
-            <if test="hasOrders != null and hasOrders == true">
-                , (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) AS order_count
-            </if>
         FROM users u
         <include refid="dynamicWhereConditions"/>
         <include refid="dynamicOrderBy"/>
@@ -293,10 +314,10 @@
 
     <!-- 극한 동적 쿼리 - 대량 INSERT (foreach 활용) -->
     <insert id="batchInsertUsers" parameterType="list">
-        INSERT INTO users (username, email, created_at)
+        INSERT INTO users (username, email, is_active, created_at)
         VALUES
         <foreach collection="list" item="user" separator=",">
-            (#{user.username}, #{user.email}, NOW())
+            (#{user.username}, #{user.email}, #{user.isActive}, NOW())
         </foreach>
     </insert>
 

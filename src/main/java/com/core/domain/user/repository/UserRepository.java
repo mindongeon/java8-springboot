@@ -1,42 +1,49 @@
-package com.core.mapper;
+package com.core.domain.user.repository;
 
-import com.core.model.User;
+import com.core.domain.user.entity.UserEntity;
 import com.core.model.UserSearchCriteria;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * 사용자 Mapper 인터페이스
+ * 사용자 Repository (MyBatis Mapper)
+ * 도메인 방식의 패키지 구조에 따른 Repository 인터페이스
  */
 @Mapper
-public interface UserMapper {
+public interface UserRepository {
 
     /**
      * 모든 사용자 조회
      */
-    List<User> findAll();
+    List<UserEntity> findAll();
 
     /**
      * ID로 사용자 조회
      */
-    User findById(@Param("id") Long id);
+    UserEntity findById(@Param("id") Long id);
 
     /**
      * 사용자명으로 사용자 조회
      */
-    User findByUsername(@Param("username") String username);
+    UserEntity findByUsername(@Param("username") String username);
+
+    /**
+     * 이메일로 사용자 조회
+     */
+    UserEntity findByEmail(@Param("email") String email);
 
     /**
      * 사용자 등록
      */
-    int insert(User user);
+    int insert(UserEntity user);
 
     /**
      * 사용자 정보 수정
      */
-    int update(User user);
+    int update(UserEntity user);
 
     /**
      * 사용자 삭제
@@ -48,12 +55,22 @@ public interface UserMapper {
      */
     int count();
 
+    /**
+     * 사용자명 중복 체크
+     */
+    boolean existsByUsername(@Param("username") String username);
+
+    /**
+     * 이메일 중복 체크
+     */
+    boolean existsByEmail(@Param("email") String email);
+
     // ==================== 극한 동적 쿼리 메서드 ====================
 
     /**
      * 동적 쿼리로 사용자 검색
      */
-    List<User> searchUsersWithDynamicQuery(UserSearchCriteria criteria);
+    List<UserEntity> searchUsersWithDynamicQuery(UserSearchCriteria criteria);
 
     /**
      * 동적 쿼리로 사용자 수 조회
@@ -63,12 +80,12 @@ public interface UserMapper {
     /**
      * 동적으로 사용자 정보 수정 (NULL이 아닌 필드만 업데이트)
      */
-    int updateUserDynamically(java.util.Map<String, Object> params);
+    int updateUserDynamically(Map<String, Object> params);
 
     /**
      * 대량 사용자 등록 (Batch Insert)
      */
-    int batchInsertUsers(java.util.List<User> users);
+    int batchInsertUsers(List<UserEntity> users);
 
     /**
      * 동적 조건으로 사용자 삭제
@@ -78,5 +95,5 @@ public interface UserMapper {
     /**
      * 주문 정보와 통계를 포함한 사용자 검색 (복잡한 JOIN)
      */
-    java.util.List<java.util.Map<String, Object>> searchUsersWithOrdersAndStats(UserSearchCriteria criteria);
+    List<Map<String, Object>> searchUsersWithOrdersAndStats(UserSearchCriteria criteria);
 }

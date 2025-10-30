@@ -16,11 +16,20 @@ java {
 }
 
 repositories {
+    println "🌐 Repository: Maven Central"
     mavenCentral()
+    // --offline 플래그 사용 시 자동으로 ~/.gradle/caches 사용
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // lombok
+    compileOnly("org.projectlombok:lombok:1.18.42")
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
 
     // JSP support
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
@@ -34,21 +43,295 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
+// ==================== 오프라인 환경 준비 ====================
 
-// 오프라인 환경 준비를 위한 task
-task copyDependencies(type: Copy) {
-    from configurations.runtimeClasspath
-    from configurations.compileClasspath
-    into 'libs'
-}
+// 1. 모든 의존성 다운로드 및 복사
+tasks.register('downloadDependencies') {
+    description = '모든 의존성을 다운로드합니다 (플러그인 포함)'
+    group = 'offline'
 
-task prepareOffline {
-    dependsOn copyDependencies
     doLast {
-        println "✅ 모든 의존성이 libs 폴더에 복사되었습니다."
-        println "📦 오프라인 환경에서는 build.gradle의 repositories를 수정하세요."
+        // 모든 configuration의 의존성 해결
+        configurations.each { configuration ->
+            if (configuration.canBeResolved) {
+                try {
+                    configuration.resolve()
+                } catch (Exception e) {
+                    logger.warn("Could not resolve configuration: ${configuration.name}")
+                }
+            }
+        }
+        println "✓ 모든 의존성 다운로드 완료"
     }
 }
+
+// 2. 의존성을 libs 디렉토리로 복사
+tasks.register('copyDependencies', Copy) {
+    description = '의존성을 libs 디렉토리로 복사합니다'
+    group = 'offline'
+
+    from configurations.runtimeClasspath
+    from configurations.compileClasspath
+    into 'libs/dependencies'
+}
+
+// 3. Gradle Wrapper 배포본을 로컬에 복사
+tasks.register('copyGradleWrapper', Copy) {
+    description = 'Gradle Wrapper 배포본을 로컬에 복사합니다'
+    group = 'offline'
+
+    def gradleVersion = gradle.gradleVersion
+    def gradleZip = "gradle-${gradleVersion}-all.zip"
+    def gradleUrl = "https://services.gradle.org/distributions/${gradleZip}"
+    def destDir = file('gradle-offline')
+
+    doFirst {
+        destDir.mkdirs()
+
+        // Gradle 배포본 다운로드
+        def gradleDistFile = new File(destDir, gradleZip)
+        if (!gradleDistFile.exists()) {
+            println "Gradle ${gradleVersion} 배포본 다운로드 중..."
+            ant.get(src: gradleUrl, dest: gradleDistFile)
+            println "✓ Gradle 배포본 다운로드 완료: ${gradleDistFile}"
+        } else {
+            println "✓ Gradle 배포본 이미 존재: ${gradleDistFile}"
+        }
+    }
+}
+
+// 4. 오프라인 패키지 생성
+tasks.register('createOfflinePackage') {
+    description = '오프라인 실행을 위한 전체 패키지를 생성합니다'
+    group = 'offline'
+
+    dependsOn downloadDependencies, copyDependencies, copyGradleWrapper
+
+    doLast {
+        def offlineDir = file('offline-package')
+        offlineDir.mkdirs()
+
+        def currentGradleVersion = gradle.gradleVersion
+
+        // README 파일 생성
+        def readme = new File(offlineDir, 'OFFLINE_SETUP.md')
+        readme.text = """
+# 오프라인 환경 설정 가이드
+
+## 1. 준비된 파일들
+
+- `gradle-offline/` - Gradle 배포본 (${currentGradleVersion})
+- `libs/dependencies/` - 프로젝트 의존성 JAR 파일들
+- `.gradle/` - Gradle 캐시 (자동 생성됨)
+
+## 2. 오프라인 환경 설정 방법
+
+### 방법 1: --offline 플래그 사용 (가장 간단)
+
+1. 전체 프로젝트를 오프라인 환경으로 복사
+2. Gradle 캐시도 함께 복사:
+   - ~/.gradle/ 디렉토리 전체를 복사
+
+3. 오프라인 모드로 빌드:
+   ```bash
+   ./gradlew build --offline
+   ```
+
+### 방법 2: Gradle Wrapper 로컬 배포본 사용
+
+1. gradle-wrapper.properties 수정:
+   ```properties
+   distributionBase=GRADLE_USER_HOME
+   distributionPath=wrapper/dists
+   distributionUrl=file:///\${프로젝트경로}/gradle-offline/gradle-${currentGradleVersion}-all.zip
+   zipStoreBase=GRADLE_USER_HOME
+   zipStorePath=wrapper/dists
+   ```
+
+2. 빌드:
+   ```bash
+   ./gradlew build --offline
+   ```
+
+### 방법 3: 모든 캐시 포함 복사
+
+온라인 환경에서:
+```bash
+# 1. 의존성 다운로드
+./gradlew build --refresh-dependencies
+
+# 2. 다음 디렉토리들을 백업
+tar -czf gradle-cache.tar.gz ~/.gradle/caches ~/.gradle/wrapper
+```
+
+오프라인 환경에서:
+```bash
+# 1. 캐시 복원
+tar -xzf gradle-cache.tar.gz -C ~/
+
+# 2. 빌드
+./gradlew build --offline
+```
+
+## 3. 추천 방법
+
+**가장 간단한 오프라인 준비:**
+
+```bash
+# 온라인 환경
+./gradlew createOfflinePackage
+./gradlew build --refresh-dependencies
+cd ~
+tar -czf gradle-home.tar.gz .gradle/
+
+# 오프라인 환경으로 복사:
+# 1. 프로젝트 전체 디렉토리
+# 2. gradle-home.tar.gz
+
+# 오프라인 환경
+tar -xzf gradle-home.tar.gz -C ~/
+cd 프로젝트경로
+./gradlew build --offline
+```
+
+## 4. 주의사항
+
+- `--offline` 플래그는 네트워크 접근을 완전히 차단합니다
+- 처음 실행 시 Gradle이 캐시를 초기화하므로 시간이 걸릴 수 있습니다
+- 새로운 의존성 추가 시 온라인 환경에서 다시 다운로드 필요
+- verification-metadata.xml이 있는 경우 그대로 유지
+
+## 5. 검증
+
+오프라인 모드 테스트:
+```bash
+./gradlew clean build --offline
+```
+
+성공하면 오프라인 환경 준비 완료!
+
+## 6. 문제 해결
+
+### "Could not resolve" 에러 발생 시:
+1. ~/.gradle/caches 디렉토리 확인
+2. 온라인 환경에서 `./gradlew build --refresh-dependencies` 재실행
+3. ~/.gradle 전체를 다시 복사
+
+### Gradle Wrapper 다운로드 에러:
+1. gradle-offline/ 디렉토리 확인
+2. gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
+"""
+
+        // 추가 스크립트 생성
+        def setupScript = new File(offlineDir, 'setup-offline.sh')
+        setupScript.text = """#!/bin/bash
+# 오프라인 환경 자동 설정 스크립트
+
+echo "=== Gradle 오프라인 환경 설정 ==="
+
+# 1. Gradle 홈 디렉토리 백업
+echo "1. Gradle 캐시 백업 중..."
+if [ -d "\$HOME/.gradle" ]; then
+    tar -czf gradle-home-backup.tar.gz -C \$HOME .gradle
+    echo "   ✓ 백업 완료: gradle-home-backup.tar.gz"
+else
+    echo "   ! .gradle 디렉토리가 없습니다. 먼저 './gradlew build'를 실행하세요."
+fi
+
+# 2. 프로젝트 파일 압축
+echo "2. 프로젝트 압축 중..."
+tar -czf project-offline.tar.gz \\
+    --exclude='build' \\
+    --exclude='.gradle' \\
+    --exclude='.idea' \\
+    --exclude='*.iml' \\
+    --exclude='out' \\
+    .
+
+echo "   ✓ 압축 완료: project-offline.tar.gz"
+
+echo ""
+echo "=== 오프라인 환경으로 복사할 파일 ==="
+echo "  1. project-offline.tar.gz (프로젝트)"
+echo "  2. gradle-home-backup.tar.gz (Gradle 캐시)"
+echo ""
+echo "=== 오프라인 환경에서 실행 ==="
+echo "  tar -xzf gradle-home-backup.tar.gz -C \$HOME"
+echo "  tar -xzf project-offline.tar.gz"
+echo "  ./gradlew build --offline"
+"""
+        setupScript.setExecutable(true)
+
+        println """
+╔══════════════════════════════════════════════════════════╗
+║     오프라인 패키지 생성 완료!                            ║
+╚══════════════════════════════════════════════════════════╝
+
+생성된 파일:
+  - gradle-offline/             : Gradle ${currentGradleVersion} 배포본
+  - libs/dependencies/          : 프로젝트 의존성 (${configurations.runtimeClasspath.files.size()} 파일)
+  - offline-package/            : 설정 가이드 및 스크립트
+    - OFFLINE_SETUP.md          : 상세 설명서
+    - setup-offline.sh          : 자동 설정 스크립트
+
+다음 단계:
+  1. 'offline-package/setup-offline.sh' 실행 (자동)
+     또는
+  2. OFFLINE_SETUP.md 파일의 지침을 따라 수동 설정
+  3. 생성된 파일들을 오프라인 환경으로 복사
+  4. './gradlew build --offline' 실행
+
+빠른 시작:
+  ./offline-package/setup-offline.sh
+
+"""
+    }
+}
+
+// 5. Gradle 캐시를 포함한 전체 백업
+tasks.register('packageForOffline', Zip) {
+    description = '오프라인 배포용 ZIP 파일을 생성합니다'
+    group = 'offline'
+
+    dependsOn createOfflinePackage, build
+
+    archiveFileName = "offline-package-${project.version}.zip"
+    destinationDirectory = file('build')
+
+    from(projectDir) {
+        exclude 'build/**'
+        exclude '.gradle/**'
+        exclude '.idea/**'
+        exclude '*.iml'
+        exclude 'out/**'
+    }
+
+    from('gradle-offline') {
+        into 'gradle-offline'
+    }
+
+    from('libs/dependencies') {
+        into 'libs/dependencies'
+    }
+
+    doLast {
+        println """
+╔══════════════════════════════════════════════════════════╗
+║     오프라인 배포 ZIP 생성 완료!                          ║
+╚══════════════════════════════════════════════════════════╝
+
+생성된 파일: build/${archiveFileName.get()}
+
+이 ZIP 파일에는 다음이 포함됩니다:
+  - 소스 코드
+  - Gradle Wrapper
+  - Gradle 배포본
+  - 모든 의존성
+
+오프라인 환경에서:
+  1. ZIP 압축 해제
+  2. ./gradlew build --offline 실행
+"""
+    }
+}
+
