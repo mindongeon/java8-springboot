@@ -18,7 +18,7 @@ java {
 repositories {
     println "🌐 Repository: Maven Central"
     mavenCentral()
-    // --offline 플래그 사용 시 자동으로 ~/.gradle/caches 사용
+    // 오프라인 모드: --offline 플래그 사용 시 자동으로 ~/.gradle/caches 사용
 }
 
 dependencies {

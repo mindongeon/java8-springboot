@@ -1,1 +1,12 @@
+// 플러그인 저장소 설정 (오프라인 환경 지원)
+// 주의: pluginManagement는 settings.gradle 파일의 맨 처음에 위치해야 함
+pluginManagement {
+    repositories {
+        // 온라인 환경에서는 Gradle Plugin Portal과 Maven Central 사용
+        // 오프라인 환경에서는 --offline 플래그와 함께 ~/.gradle/caches 사용
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = 'core'

@@ -11,6 +11,14 @@ gradle-offline/
 libs/dependencies/
 offline-package/
 
+# Gradle 백업 관련 (part 파일은 Git에 포함, 원본과 임시 파일만 제외)
+gradle-backup.tar.gz
+gradle-minimal-backup.tar.gz
+gradle-backup.zip
+test-*.tar.gz
+test-*.zip
+.gradle-test*/
+
 ### STS ###
 .apt_generated
 .classpath
