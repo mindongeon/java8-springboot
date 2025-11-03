@@ -12,10 +12,9 @@ spring:
   # datasource:
   #   jndi-name: java:comp/env/jdbc/myDataSource
 
-# MyBatis Configuration
+# MyBatis Configuration - SQL Builder 방식 사용
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.core.model
+  type-aliases-package: com.core.model,com.core.domain.user.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
