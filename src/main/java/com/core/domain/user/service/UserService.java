@@ -31,6 +31,9 @@ public class UserService {
 
     /**
      * 모든 사용자 조회
+     * 삭제되지 않은 모든 사용자를 조회하여 기본 정보를 반환합니다.
+     *
+     * @return List<UserResponseDto.Basic> 사용자 기본 정보 리스트
      */
     @Transactional(readOnly = true)
     public List<UserResponseDto.Basic> getAllUsers() {
@@ -40,6 +43,11 @@ public class UserService {
 
     /**
      * ID로 사용자 조회
+     * 지정된 ID의 사용자를 조회하여 상세 정보를 반환합니다.
+     *
+     * @param id 조회할 사용자 ID
+     * @return UserResponseDto.Detail 사용자 상세 정보
+     * @throws IllegalArgumentException 사용자가 존재하지 않을 경우
      */
     @Transactional(readOnly = true)
     public UserResponseDto.Detail getUserById(Long id) {
@@ -52,6 +60,12 @@ public class UserService {
 
     /**
      * 사용자명으로 사용자 조회
+     * 지정된 사용자명으로 사용자를 조회합니다.
+     * VO(Value Object)를 사용하여 사용자명의 유효성을 검증합니다.
+     *
+     * @param username 조회할 사용자명
+     * @return UserResponseDto.Detail 사용자 상세 정보
+     * @throws IllegalArgumentException 사용자명이 유효하지 않거나 사용자가 존재하지 않을 경우
      */
     @Transactional(readOnly = true)
     public UserResponseDto.Detail getUserByUsername(String username) {
@@ -67,6 +81,14 @@ public class UserService {
 
     /**
      * 사용자 생성
+     * 새로운 사용자를 생성합니다.
+     * - VO를 사용하여 username과 email의 유효성을 검증
+     * - 중복된 username 또는 email이 있는지 확인
+     * - 모든 검증을 통과하면 사용자를 생성하고 저장
+     *
+     * @param request 사용자 생성 요청 DTO (username, email 필수)
+     * @return UserResponseDto.Detail 생성된 사용자 상세 정보
+     * @throws IllegalArgumentException 사용자명 또는 이메일이 이미 존재하거나 유효하지 않을 경우
      */
     public UserResponseDto.Detail createUser(UserRequestDto.Create request) {
         // VO를 사용한 유효성 검증
@@ -95,6 +117,15 @@ public class UserService {
 
     /**
      * 사용자 수정
+     * 기존 사용자의 정보를 수정합니다.
+     * - 동적 업데이트: null이 아닌 필드만 업데이트
+     * - VO를 사용한 유효성 검증
+     * - 다른 사용자가 이미 사용 중인 username/email인지 확인
+     *
+     * @param id 수정할 사용자 ID
+     * @param request 사용자 수정 요청 DTO (수정할 필드만 설정, null인 필드는 무시)
+     * @return UserResponseDto.Detail 수정된 사용자 상세 정보
+     * @throws IllegalArgumentException 사용자가 존재하지 않거나, username/email이 중복되거나, 유효하지 않을 경우
      */
     public UserResponseDto.Detail updateUser(Long id, UserRequestDto.Update request) {
         // 존재 여부 확인
@@ -146,6 +177,11 @@ public class UserService {
 
     /**
      * 사용자 삭제
+     * 지정된 ID의 사용자를 삭제합니다.
+     * 삭제 전에 사용자 존재 여부를 확인합니다.
+     *
+     * @param id 삭제할 사용자 ID
+     * @throws IllegalArgumentException 사용자가 존재하지 않을 경우
      */
     public void deleteUser(Long id) {
         UserEntity existingEntity = userRepository.findById(id);
@@ -158,6 +194,9 @@ public class UserService {
 
     /**
      * 전체 사용자 수 조회
+     * 삭제되지 않은 전체 사용자 수를 반환합니다.
+     *
+     * @return long 사용자 수 (삭제된 사용자 제외)
      */
     @Transactional(readOnly = true)
     public long getUserCount() {
@@ -166,6 +205,13 @@ public class UserService {
 
     /**
      * 동적 쿼리로 사용자 검색 (페이징)
+     * 다양한 조건으로 사용자를 검색하고 페이징 처리된 결과를 반환합니다.
+     * - 검색 조건: ID, username, email, 날짜 범위, 활성화 여부 등
+     * - 정렬: 다양한 컬럼 기준 오름차순/내림차순
+     * - 페이징: page, size 파라미터로 제어
+     *
+     * @param searchDto 검색 조건 DTO
+     * @return UserResponseDto.Page 페이징 정보와 사용자 목록
      */
     @Transactional(readOnly = true)
     public UserResponseDto.Page searchUsers(UserRequestDto.Search searchDto) {
@@ -188,6 +234,13 @@ public class UserService {
 
     /**
      * 주문 통계를 포함한 사용자 검색
+     * 사용자 정보와 함께 주문 통계 정보를 조회합니다.
+     * - orderCount: 주문 수
+     * - totalAmount: 총 주문 금액
+     * - customerTier: 고객 등급 (VIP, PREMIUM, REGULAR, NORMAL)
+     *
+     * @param searchDto 검색 조건 DTO
+     * @return List<UserResponseDto.WithStats> 주문 통계가 포함된 사용자 목록
      */
     @Transactional(readOnly = true)
     public List<UserResponseDto.WithStats> searchUsersWithStats(UserRequestDto.Search searchDto) {
@@ -202,6 +255,13 @@ public class UserService {
 
     /**
      * 대량 사용자 생성
+     * 여러 사용자를 한 번에 생성합니다.
+     * - 각 사용자에 대해 VO를 사용한 유효성 검증 수행
+     * - 배치 INSERT로 성능 최적화
+     *
+     * @param requests 사용자 생성 요청 DTO 리스트
+     * @return int 생성된 사용자 수
+     * @throws IllegalArgumentException 유효하지 않은 데이터가 포함된 경우
      */
     public int batchCreateUsers(List<UserRequestDto.Create> requests) {
         List<UserEntity> entities = requests.stream()
@@ -224,6 +284,10 @@ public class UserService {
 
     /**
      * SearchDto를 Criteria로 변환
+     * Controller 계층의 DTO를 Repository 계층의 검색 조건 객체로 변환합니다.
+     *
+     * @param searchDto 검색 DTO
+     * @return UserSearchCriteria 검색 조건 객체
      */
     private UserSearchCriteria convertToCriteria(UserRequestDto.Search searchDto) {
         UserSearchCriteria criteria = new UserSearchCriteria();
@@ -247,6 +311,10 @@ public class UserService {
 
     /**
      * Map을 WithStatsDto로 변환
+     * Repository에서 반환한 Map 형태의 결과를 DTO로 변환합니다.
+     *
+     * @param map Repository 쿼리 결과 Map
+     * @return UserResponseDto.WithStats 주문 통계가 포함된 사용자 DTO
      */
     private UserResponseDto.WithStats mapToWithStatsDto(Map<String, Object> map) {
         UserResponseDto.WithStats dto = new UserResponseDto.WithStats();
