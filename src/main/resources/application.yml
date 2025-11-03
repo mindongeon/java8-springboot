@@ -14,8 +14,9 @@ spring:
 
 # MyBatis Configuration
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.core.model
+  # XML 매퍼 대신 SQL Builder 방식 사용 (@SelectProvider, @InsertProvider 등)
+  # mapper-locations: classpath:mapper/**/*.xml  # XML 방식 비활성화
+  type-aliases-package: com.core.model,com.core.domain.user.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

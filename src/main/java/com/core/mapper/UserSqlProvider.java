@@ -1,5 +1,6 @@
 package com.core.mapper;
 
+import com.core.model.User;
 import com.core.model.UserSearchCriteria;
 import org.apache.ibatis.jdbc.SQL;
 
@@ -11,6 +12,96 @@ import java.util.Map;
  * SQL Builder 패턴으로 복잡한 동적 쿼리를 타입 세이프하게 작성
  */
 public class UserSqlProvider {
+
+    // ==================== 기본 CRUD SQL Builder 메서드 ====================
+
+    /**
+     * 모든 사용자 조회
+     */
+    public String findAll() {
+        return new SQL() {{
+            SELECT("id", "username", "email", "created_at");
+            FROM("users");
+            ORDER_BY("id DESC");
+        }}.toString();
+    }
+
+    /**
+     * ID로 사용자 조회
+     */
+    public String findById() {
+        return new SQL() {{
+            SELECT("id", "username", "email", "created_at");
+            FROM("users");
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    /**
+     * 사용자명으로 사용자 조회
+     */
+    public String findByUsername() {
+        return new SQL() {{
+            SELECT("id", "username", "email", "created_at");
+            FROM("users");
+            WHERE("username = #{username}");
+        }}.toString();
+    }
+
+    /**
+     * 이메일로 사용자 조회
+     */
+    public String findByEmail() {
+        return new SQL() {{
+            SELECT("id", "username", "email", "created_at");
+            FROM("users");
+            WHERE("email = #{email}");
+        }}.toString();
+    }
+
+    /**
+     * 사용자 등록
+     */
+    public String insert(User user) {
+        return new SQL() {{
+            INSERT_INTO("users");
+            VALUES("username", "#{username}");
+            VALUES("email", "#{email}");
+            VALUES("created_at", "NOW()");
+        }}.toString();
+    }
+
+    /**
+     * 사용자 정보 수정
+     */
+    public String update(User user) {
+        return new SQL() {{
+            UPDATE("users");
+            SET("username = #{username}");
+            SET("email = #{email}");
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    /**
+     * 사용자 삭제
+     */
+    public String deleteById() {
+        return new SQL() {{
+            DELETE_FROM("users");
+            WHERE("id = #{id}");
+        }}.toString();
+    }
+
+    /**
+     * 전체 사용자 수 조회
+     */
+    public String count() {
+        return new SQL() {{
+            SELECT("COUNT(*)");
+            FROM("users");
+        }}.toString();
+    }
 
     /**
      * 극한 동적 쿼리 - 복잡한 검색 조건
